@@ -179,7 +179,7 @@ const onCreateProduct = () => {
 
 <style scoped>
 .page {
-  padding: 32px 40px;
+  padding: clamp(24px, 2vw + 20px, 40px);
   min-height: 100vh;
   background: linear-gradient(180deg, #f7f9fc 0%, #eef2f7 100%);
 }
@@ -187,12 +187,18 @@ const onCreateProduct = () => {
 .tag-filter {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--space-2);
   flex-wrap: wrap;
 }
 
 .tag-filter__label {
   font-weight: 600;
-  color: #52606d;
+  color: var(--color-muted);
+}
+
+@media (max-width: 768px) {
+  .page {
+    padding: clamp(16px, 6vw, 28px);
+  }
 }
 </style>
