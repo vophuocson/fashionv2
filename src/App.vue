@@ -1,204 +1,335 @@
-<script setup>
-import { computed, reactive, ref } from 'vue';
-import ProductBoardHeader from './components/ProductBoardHeader.vue';
-import ProductKanban from './components/ProductKanban.vue';
-import ProductQuickViewModal from './components/ProductQuickViewModal.vue';
-import InlineTagFilter from './components/InlineTagFilter.vue';
-
-const statuses = ['Draft', 'Active', 'Out of Stock', 'Archived'];
-
-const collections = ['All', 'New Arrivals', 'Essentials', 'Outlet'];
-
-const products = reactive([
-  {
-    id: 'SKU-001',
-    name: 'Minimalist Linen Shirt',
-    price: 480000,
-    inventory: 36,
-    status: 'Active',
-    collection: 'Essentials',
-    tags: ['linen', 'summer'],
-    thumbnail: 'https://images.unsplash.com/photo-1521572267360-ee0c2909d518?auto=format&fit=crop&w=400&q=60'
-  },
-  {
-    id: 'SKU-002',
-    name: 'Relaxed Fit Denim',
-    price: 720000,
-    inventory: 12,
-    status: 'Out of Stock',
-    collection: 'New Arrivals',
-    tags: ['denim', 'blue'],
-    thumbnail: 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?auto=format&fit=crop&w=400&q=60'
-  },
-  {
-    id: 'SKU-003',
-    name: 'Classic White Tee',
-    price: 220000,
-    inventory: 120,
-    status: 'Active',
-    collection: 'Essentials',
-    tags: ['cotton', 'basic'],
-    thumbnail: 'https://images.unsplash.com/photo-1542293787938-4d2726154513?auto=format&fit=crop&w=400&q=60'
-  },
-  {
-    id: 'SKU-004',
-    name: 'Oversized Hoodie',
-    price: 650000,
-    inventory: 8,
-    status: 'Draft',
-    collection: 'New Arrivals',
-    tags: ['unisex', 'cozy'],
-    thumbnail: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&w=400&q=60'
-  },
-  {
-    id: 'SKU-005',
-    name: 'Wool Blend Coat',
-    price: 1850000,
-    inventory: 4,
-    status: 'Archived',
-    collection: 'Outlet',
-    tags: ['winter', 'coat'],
-    thumbnail: 'https://images.unsplash.com/photo-1487222477894-8943e31ef7b2?auto=format&fit=crop&w=400&q=60'
-  }
-]);
-
-const filters = reactive({
-  search: '',
-  status: 'All',
-  collection: 'All',
-  tags: []
-});
-
-const quickViewId = ref(null);
-
-const filteredProducts = computed(() => {
-  return products.filter((product) => {
-    const matchesSearch = product.name.toLowerCase().includes(filters.search.toLowerCase()) ||
-      product.id.toLowerCase().includes(filters.search.toLowerCase());
-    const matchesStatus = filters.status === 'All' ? true : product.status === filters.status;
-    const matchesCollection = filters.collection === 'All' ? true : product.collection === filters.collection;
-    const matchesTags = filters.tags.length === 0 || filters.tags.every((tag) => product.tags.includes(tag));
-    return matchesSearch && matchesStatus && matchesCollection && matchesTags;
-  });
-});
-
-const groupedProducts = computed(() => {
-  return statuses.reduce((acc, status) => {
-    acc[status] = filteredProducts.value.filter((product) => product.status === status);
-    return acc;
-  }, {});
-});
-
-const moveProduct = (productId, targetStatus) => {
-  const product = products.find((item) => item.id === productId);
-  if (product) product.status = targetStatus;
-};
-
-const onSearchChange = (value) => {
-  filters.search = value;
-};
-
-const onStatusChange = (value) => {
-  filters.status = value;
-};
-
-const onCollectionChange = (value) => {
-  filters.collection = value;
-};
-
-const onTagToggle = (tag) => {
-  if (filters.tags.includes(tag)) {
-    filters.tags = filters.tags.filter((item) => item !== tag);
-  } else {
-    filters.tags = [...filters.tags, tag];
-  }
-};
-
-const onOpenQuickView = (productId) => {
-  quickViewId.value = productId;
-};
-
-const onCloseQuickView = () => {
-  quickViewId.value = null;
-};
-
-const onCreateProduct = () => {
-  const index = products.length + 1;
-  products.unshift({
-    id: `SKU-00${index}`,
-    name: `New Product ${index}`,
-    price: 250000,
-    inventory: 0,
-    status: 'Draft',
-    collection: 'New Arrivals',
-    tags: ['new'],
-    thumbnail: 'https://images.unsplash.com/photo-1495107334309-fcf20504a5ab?auto=format&fit=crop&w=400&q=60'
-  });
-};
-</script>
-
 <template>
   <div class="page">
-    <ProductBoardHeader
-      :statuses="['All', ...statuses]"
-      :collections="collections"
-      :selected-status="filters.status"
-      :selected-collection="filters.collection"
-      :search="filters.search"
-      @update:search="onSearchChange"
-      @update:status="onStatusChange"
-      @update:collection="onCollectionChange"
-      @create="onCreateProduct"
-    >
-      <template #tags>
-        <div class="tag-filter">
-          <span class="tag-filter__label">Tags:</span>
-          <InlineTagFilter
-            :options="['linen', 'summer', 'denim', 'blue', 'cotton', 'basic', 'unisex', 'cozy', 'winter', 'coat', 'new']"
-            :selected="filters.tags"
-            @toggle="onTagToggle"
-          />
-        </div>
-      </template>
-    </ProductBoardHeader>
+    <header class="top-nav">
+      <div class="brand">tailwind x flowbite</div>
+      <nav class="nav-links">
+        <a href="#">Home</a>
+        <a href="#">Web design</a>
+        <a href="#">Logo design</a>
+        <a href="#">Illustrations</a>
+      </nav>
+      <div class="nav-actions">
+        <select class="language-select" aria-label="Language selector">
+          <option>English (US)</option>
+          <option>Tiếng Việt</option>
+          <option>日本語</option>
+        </select>
+        <a class="ghost-link" href="#">Sign in</a>
+        <button class="primary">Sign up</button>
+      </div>
+    </header>
 
-    <ProductKanban
-      :columns="statuses"
-      :products-by-status="groupedProducts"
-      @move="moveProduct"
-      @open="onOpenQuickView"
-    />
+    <main class="content">
+      <section class="hero">
+        <div class="orb" aria-hidden="true"></div>
+        <div class="glow" aria-hidden="true"></div>
+      </section>
 
-    <ProductQuickViewModal
-      v-if="quickViewId"
-      :product="products.find((product) => product.id === quickViewId)"
-      @close="onCloseQuickView"
-    />
+      <section class="auth-card">
+        <p class="badge">FEATURED</p>
+        <h1>Sign up</h1>
+        <p class="subtitle">Sign up to see the overview of your products</p>
+
+        <form class="form">
+          <label class="field">
+            <span>Email address</span>
+            <input type="email" placeholder="name@company.com" required />
+          </label>
+          <label class="field">
+            <span>Password</span>
+            <div class="password-field">
+              <input type="password" placeholder="••••••••" required />
+              <span class="toggle">Hide</span>
+            </div>
+          </label>
+
+          <label class="checkbox">
+            <input type="checkbox" checked />
+            <span>I agree with the <a href="#">Terms and Conditions</a> and <a href="#">Privacy Policy</a>.</span>
+          </label>
+          <label class="checkbox">
+            <input type="checkbox" checked />
+            <span>Subscribe to our monthly newsletter</span>
+          </label>
+
+          <button type="submit" class="primary full">Sign up</button>
+          <button type="button" class="outline full">I am not a robot</button>
+        </form>
+
+        <p class="footer">Already have an account? <a href="#">Sign in</a></p>
+      </section>
+    </main>
   </div>
 </template>
 
 <style scoped>
 .page {
-  padding: clamp(24px, 2vw + 20px, 40px);
   min-height: 100vh;
-  background: linear-gradient(180deg, #f7f9fc 0%, #eef2f7 100%);
+  background: radial-gradient(circle at 20% 30%, #f2f7ff 0%, #f7f9fd 40%, #ffffff 100%);
+  color: #111827;
+  padding: 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 48px;
 }
 
-.tag-filter {
+.top-nav {
   display: flex;
   align-items: center;
-  gap: var(--space-2);
-  flex-wrap: wrap;
+  gap: 24px;
+  justify-content: space-between;
+  max-width: 1280px;
+  width: 100%;
+  margin: 0 auto;
 }
 
-.tag-filter__label {
+.brand {
+  font-weight: 700;
+  letter-spacing: 0.4px;
+  text-transform: lowercase;
+}
+
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  color: #4b5563;
   font-weight: 600;
-  color: var(--color-muted);
 }
 
-@media (max-width: 768px) {
+.nav-links a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.nav-links a:hover {
+  color: #111827;
+}
+
+.nav-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.language-select {
+  border: 1px solid #e5e7eb;
+  background: #fff;
+  border-radius: 12px;
+  padding: 10px 12px;
+  font-weight: 600;
+  color: #111827;
+}
+
+.ghost-link {
+  color: #6b7280;
+  text-decoration: none;
+  font-weight: 700;
+}
+
+.primary {
+  background: #111827;
+  color: #fff;
+  border: none;
+  border-radius: 14px;
+  padding: 12px 18px;
+  font-weight: 700;
+  box-shadow: 0 10px 30px rgba(17, 24, 39, 0.15);
+}
+
+.primary:hover {
+  transform: translateY(-1px);
+}
+
+.content {
+  max-width: 1280px;
+  width: 100%;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: minmax(360px, 1fr) minmax(420px, 500px);
+  gap: 40px;
+  align-items: center;
+}
+
+.hero {
+  position: relative;
+  aspect-ratio: 1 / 1;
+  background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.6), transparent 45%),
+    radial-gradient(circle at 70% 70%, rgba(255, 255, 255, 0.35), transparent 55%),
+    linear-gradient(135deg, #fef3c7, #e0f2fe);
+  border-radius: 32px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 32px;
+  box-shadow: 0 30px 80px rgba(15, 23, 42, 0.12);
+}
+
+.orb {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.6), transparent 45%),
+    radial-gradient(circle at 70% 70%, rgba(255, 255, 255, 0.5), transparent 55%),
+    conic-gradient(from 160deg at 50% 50%, #8dd0ff, #f9d29d, #fbb6ce, #8dd0ff);
+  filter: blur(0px);
+  position: relative;
+  box-shadow: inset 0 0 80px rgba(255, 255, 255, 0.4);
+}
+
+.glow {
+  position: absolute;
+  inset: 12%;
+  border-radius: 32px;
+  background: radial-gradient(circle at 20% 20%, rgba(255, 255, 255, 0.6), transparent 40%),
+    radial-gradient(circle at 80% 60%, rgba(255, 255, 255, 0.5), transparent 60%),
+    linear-gradient(135deg, rgba(255, 255, 255, 0.6), rgba(255, 255, 255, 0));
+  filter: blur(30px);
+  z-index: -1;
+}
+
+.auth-card {
+  background: rgba(255, 255, 255, 0.82);
+  backdrop-filter: blur(14px);
+  border: 1px solid #f3f4f6;
+  border-radius: 20px;
+  padding: 32px;
+  box-shadow: 0 20px 60px rgba(15, 23, 42, 0.12);
+}
+
+.badge {
+  display: inline-flex;
+  padding: 4px 12px;
+  background: #f5f3ff;
+  color: #7c3aed;
+  border-radius: 999px;
+  font-weight: 700;
+  font-size: 12px;
+  letter-spacing: 0.2px;
+  margin: 0 0 10px;
+}
+
+h1 {
+  margin: 0 0 6px;
+  font-size: 32px;
+}
+
+.subtitle {
+  margin: 0 0 28px;
+  color: #6b7280;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-weight: 600;
+  color: #374151;
+}
+
+.field input {
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 12px 14px;
+  font-size: 15px;
+  background: #fff;
+  width: 100%;
+}
+
+.password-field {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 10px;
+}
+
+.toggle {
+  color: #6b7280;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.checkbox {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  color: #4b5563;
+  font-size: 14px;
+}
+
+.checkbox input {
+  margin-top: 3px;
+  width: 16px;
+  height: 16px;
+  accent-color: #111827;
+}
+
+.full {
+  width: 100%;
+  justify-content: center;
+  text-align: center;
+}
+
+.outline {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
+  padding: 12px 18px;
+  font-weight: 700;
+  color: #111827;
+}
+
+.footer {
+  margin-top: 18px;
+  color: #6b7280;
+  font-weight: 600;
+}
+
+.footer a {
+  color: #111827;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+@media (max-width: 1024px) {
   .page {
-    padding: clamp(16px, 6vw, 28px);
+    padding: 24px;
+  }
+
+  .content {
+    grid-template-columns: 1fr;
+  }
+
+  .hero {
+    order: 2;
+  }
+}
+
+@media (max-width: 640px) {
+  .top-nav {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+  }
+
+  .nav-links {
+    flex-wrap: wrap;
+  }
+
+  .nav-actions {
+    width: 100%;
+    flex-wrap: wrap;
+  }
+
+  .content {
+    gap: 24px;
   }
 }
 </style>
